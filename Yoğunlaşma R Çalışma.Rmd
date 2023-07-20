@@ -1,0 +1,648 @@
+---
+title: "Yoğunlaşma"
+output: html_document
+date: "2023-07-20"
+
+# Veri setini raw linkten çekmek için
+df <- read.csv("https://raw.githubusercontent.com/fsccakir/Yogunlasma-Verileri/main/T%C3%BCik%20HH%C4%B0%20ve%20CR%20oranlar%C4%B1%20R.csv")
+
+veri_2009 <- df %>% filter(Yıl == 2009)
+veri_2010 <- df %>% filter(Yıl == 2010)
+veri_2011 <- df %>% filter(Yıl == 2011)
+veri_2012 <- df %>% filter(Yıl == 2012)
+veri_2013 <- df %>% filter(Yıl == 2013)
+veri_2014 <- df %>% filter(Yıl == 2014)
+veri_2015 <- df %>% filter(Yıl == 2015)
+
+```{r}
+"Bütün Yoğunlaşma verileri ile Genel Bakış"
+
+"Kısımlara Göre Girişim Pastası"
+
+library(ggplot2)
+library(dplyr)
+
+# Eksik değerleri çıkararak "Kısım" ve "Number.of.enterprises" sütunlarını filtreleyin
+Kısım_Girişim <- df %>% 
+  na.omit() %>%
+  select(Kısım, Number.of.enterprises)
+
+# Pasta grafik oluşturmak için ggplot kullanın
+Kısımlara_göre_Girişim_Sayıları <- ggplot(Kısım_Girişim, aes(x = "", y = Number.of.enterprises, fill = Kısım)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  labs(x = NULL, y = NULL, fill = "Kısımlar", title = "Sektörlere göre Girişim Sayıları") +
+  theme_minimal() +
+  theme(axis.text = element_blank(), panel.grid = element_blank())
+
+# Pasta grafik görselini ekrana bastırın
+print(Kısımlara_göre_Girişim_Sayıları)
+
+
+
+"1.grafik yoğunluk analizi"
+library(ggplot2)
+
+df %>%
+  ggplot(aes(x = Herfindahl.index, color = "Histogram")) +
+  geom_freqpoly(aes(y = stat(count)), binwidth = 0.1, show.legend = TRUE) +
+  geom_freqpoly(data = df, aes(x = Herfindahl.index, color = "Density"), binwidth = 0.1, alpha = 0.5, show.legend = TRUE) +
+  labs(title = "Histogram and Density Plot by Herfindahl Index",
+       x = "Herfindahl Index",
+       y = "Number.of.enterprises",
+       color = "Legend") +
+  scale_color_manual(values = c("black", "#71f653")) +
+  theme_minimal()
+  
+  "2.Grafik çoklu Korelasyon"
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+
+select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+
+"3.grafik ısı haritası korelasyon"
+library(ggcorrplot)
+değişkenler <- c("Number.of.enterprises", "CR4", "CR8", "Herfindahl.index")
+# Eksik verileri çıkar
+df_no_na <- na.omit(df[, değişkenler])
+
+# Değişkenler arasındaki korelasyon matrisini hesapla
+korelasyon_matrisi <- cor(df_no_na)
+
+# Korelasyon matrisini görselleştir
+ggcorrplot(korelasyon_matrisi, 
+           hc.order = TRUE, 
+           type = "lower", 
+           outline.color = "white", 
+           ggtheme = ggplot2::theme_minimal(),
+           colors = c(scales::muted("red"), "white", "steelblue"),
+           lab = TRUE)
+
+```
+
+
+```{r}
+"B - Madencilik ve Taş OcakcılığI"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1:99)
+  
+df_subset %>%
+  ggplot(aes(`Herfindahl.index`, y = Number.of.enterprises)) +
+  geom_point()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "B - Madencilik ve Taş Ocakcılığı",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 1, row_number() <= 99) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+# Eksik değerleri atmak için na.rm seçeneğini kullanarak aes belirleyin
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+
+"CR4 İLE HHI Grafiği"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1:99)
+  
+df_subset %>%
+  ggplot(aes(`Herfindahl.index`, y = CR4)) +
+  geom_point()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index,CR4)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "B - Madencilik ve Taş Ocakcılığı",
+       x = "Herfindahl Index",
+       y = "CR4")
+       
+"CR8 İLE HHI Grafiği"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1:99)
+  
+df_subset %>%
+  ggplot(aes(`Herfindahl.index`, y = CR8)) +
+  geom_point()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, CR8)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "B - Madencilik ve Taş Ocakcılığı",
+       x = "Herfindahl Index",
+       y = "CR8")
+```
+
+```{r}
+"C - İmalat"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(99:1681) %>%
+  na.omit()
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "C - İmalat",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 99, row_number() <= 1681) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"D - Elektrik, Gaz, Buhar, ve İklimlendirme"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1682:1737) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "D - Elektrik, Gaz, Buhar, ve İklimlendirme",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 1682, row_number() <= 1737) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"E - Su temini; kanalizasyon, atık yönetimi"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1738:1800) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "E - Su temini; kanalizasyon, atık yönetimi",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 1738, row_number() <= 1800) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"F - İnşaat"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1801:1954) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "F - İnşaat",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 1801, row_number() <= 1954) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"G - Toptan ve perakende ticaret; motorlu kara"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(1955:2591) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "G - Toptan ve perakende ticaret; motorlu kara",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 1955, row_number() <= 2591) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"H - Ulaştırma ve depolama"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(2592:2745) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "H - Ulaştırma ve depolama",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 2592, row_number() <= 2745) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))
+```
+
+```{r}
+"I - Konaklama ve yiyecek hizmeti faaliyetleri"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(2746:2799) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "I - Konaklama ve yiyecek hizmeti faaliyetleri",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+ " 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 2746, row_number() <= 2799) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))      
+```
+
+```{r}
+"J - Bilgi ve iletişim"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(2800:2969) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "J - Bilgi ve iletişim",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 2800, row_number() <= 2969) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))       
+```
+
+```{r}
+"L - Gayrimenkul faaliyetleri"
+
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(2970:2983) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "L - Gayrimenkul faaliyetleri",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 2970, row_number() <= 2983) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))     
+```
+
+```{r}
+"M - Mesleki, bilimsel ve teknik faaliyetler"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(2984:3116) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "M - Mesleki, bilimsel ve teknik faaliyetler",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 2984, row_number() <= 3116) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))       
+```
+
+```{r}
+"N - İdari ve destek hizmet faaliyetleri"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(3117:3347) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "N - İdari ve destek hizmet faaliyetleri",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+ " 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 3117, row_number() <= 3347) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))      
+```
+
+```{r}
+"P - Eğitim"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(3348:3424) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "P - Eğitim",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+ " 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 3348, row_number() <= 3424) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))      
+```
+
+```{r}
+"Q - İnsan sağlığı ve sosyal hizmet "
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(3425:3508) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Q - İnsan sağlığı ve sosyal hizmet ",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+" 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 3425, row_number() <= 3508) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))       
+```
+
+```{r}
+"R - Kültür, sanat, eğlence, dinlence ve spor "
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(3509:3613) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "R - Kültür, sanat, eğlence, dinlence ve spor ",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+ " 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 3509, row_number() <= 3613) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))      
+```
+
+```{r}
+"S - Diğer hizmet faaliyetleri"
+library(dplyr)
+library(ggplot2)
+
+
+df_subset <- df %>% 
+  slice(3614:3704) %>%
+  na.omit()
+
+
+df_subset %>%
+  ggplot(aes(Herfindahl.index, Number.of.enterprises)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "S - Diğer hizmet faaliyetleri",
+       x = "Herfindahl Index",
+       y = "Number of Enterprises")
+       
+ " 2.Farklı GRAFİK çoklu korelasyon "
+
+library(ggplot2)
+library(GGally)
+
+df_subset <- df %>%
+  filter(row_number() >= 3614, row_number() <= 3704) %>%
+  select(Herfindahl.index, Number.of.enterprises, CR4, CR8)
+
+
+GGally::ggpairs(data = df_subset, mapping = ggplot2::aes(na.rm = TRUE))      
+```
+

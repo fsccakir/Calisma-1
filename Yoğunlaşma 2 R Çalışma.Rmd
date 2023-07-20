@@ -1,0 +1,55 @@
+df <- read.csv("https://raw.githubusercontent.com/fsccakir/Yogunlasma-Verileri/main/T%C3%BCik%20HH%C4%B0%20ve%20CR%20oranlar%C4%B1%20R.csv")
+
+
+```{r}
+
+
+library(dplyr)
+
+#Yılları filtreleyerek yeni bir veri çerçevesi oluşturun
+veri_2009 <- df %>% filter(Yıl == 2009)
+veri_2010 <- df %>% filter(Yıl == 2010)
+veri_2011 <- df %>% filter(Yıl == 2011)
+veri_2012 <- df %>% filter(Yıl == 2012)
+veri_2013 <- df %>% filter(Yıl == 2013)
+veri_2014 <- df %>% filter(Yıl == 2014)
+veri_2015 <- df %>% filter(Yıl == 2015)
+
+"Pasta"
+
+Kısım_Girişim<- df %>% select(Kısım, Number.of.enterprises)
+
+# Panel veri setinizin adını "Kısım_Girişim" olarak varsayalım
+library(ggplot2)
+library(dplyr)
+
+# Pasta grafik oluşturmak için ggplot kullanın
+Kısımlara_göre_Girişim_Sayıları <- ggplot(Kısım_Girişim, aes(x = "", y = Number.of.enterprises, fill = Kısım)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  labs(x = NULL, y = NULL, fill = "Kısımlar") +
+  theme_minimal() +
+  theme(axis.text = element_blank(), panel.grid = element_blank())
+
+# Pasta grafik görselini ekrana bastırın
+print(grafik)
+
+```
+
+
+```{r}
+
+
+```
+
+
+
+```{r}
+
+
+
+```
+
+
+
+
